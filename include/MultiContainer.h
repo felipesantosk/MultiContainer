@@ -1,36 +1,56 @@
 
+#include <any>
 #include <map>
 #include <memory>
 #include <optional>
-#include <set>
 #include <typeindex>
 
 namespace fsk
 {
    struct IContainer
    {
+      virtual void Insert( const std::any &object ) = 0;
+      virtual std::any Find( const std::any &filter ) = 0;
    };
 
-   template< typename T > struct Container : IContainer
+   template< typename CT > struct Container : IContainer
    {
-      std::set< T > m_values;
+      void Insert( const std::any &object ) override
+      {
+         m_container.insert( std::any_cast< CT::value_type >( object ) );
+      }
+
+      std::any Find( const std::any &filter ) override
+      {
+         auto itr = m_container.find( std::any_cast< CT::value_type >( filter ) );
+
+         if( itr == std::cend( m_container ) )
+         {
+            return {};
+         }
+
+         return *itr;
+      }
+
+      CT m_container;
    };
 
    class MultiContainer
    {
     public:
+      template< typename CT > void InsertTypeSlot()
+      {
+         m_containers[std::type_index( typeid( CT::value_type ) )] = std::make_unique< Container< CT > >();
+      }
+
       template< typename T > void Insert( const T &value )
       {
          auto itr = m_containers.find( std::type_index( typeid( T ) ) );
 
-         if( itr == std::cend( m_containers ) )
+         if( itr != std::cend( m_containers ) )
          {
-            auto [ret, _] =
-                m_containers.insert( { std::type_index( typeid( T ) ), std::make_unique< Container< T > >() } );
-            itr = ret;
+            itr->second->Insert( value );
          }
-
-         static_cast< Container< T > & >( *itr->second ).m_values.insert( value );
       }
 
       template< typename T > std::optional< T > Find( const T &value ) const
@@ -42,11 +62,11 @@ namespace fsk
             return {};
          }
 
-         const auto &values = static_cast< const Container< T > & >( *typeItr->second ).m_values;
+         auto obj = typeItr->second->Find( value );
 
-         if( auto itr = values.find( value ); itr != std::cend( values ) )
+         if( obj.has_value() )
          {
-            return *itr;
+            return std::any_cast< T >( obj );
          }
 
          return {};

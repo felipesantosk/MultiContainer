@@ -2,7 +2,9 @@
 
 #include "MultiContainer.h"
 
+#include <set>
 #include <tuple>
+#include <unordered_set>
 
 #include <catch2/catch.hpp>
 
@@ -22,9 +24,36 @@ bool operator==( const Test &value1, const Test &value2 )
    return std::tie( value1.attr1, value1.attr2 ) == std::tie( value2.attr1, value2.attr2 );
 }
 
-SCENARIO( "MultiContainer can be inserted and searched", "[MultiContainer]" )
+SCENARIO( "MultiContainer can not be inserted with the type it's initialized", "[MultiContainer]" )
 {
    fsk::MultiContainer multiContainer;
+
+   WHEN( "Trying insert types" )
+   {
+      multiContainer.Insert< int32_t >( 10 );
+      multiContainer.Insert< int32_t >( 14 );
+      multiContainer.Insert< int16_t >( 10 );
+      multiContainer.Insert< Test >( { 10, 11 } );
+      multiContainer.Insert< Test >( { 10, 13 } );
+
+      THEN( "Not found because was not inserted" )
+      {
+         CHECK_FALSE( multiContainer.Find< int32_t >( 10 ).has_value() );
+         CHECK_FALSE( multiContainer.Find< int32_t >( 14 ).has_value() );
+         CHECK_FALSE( multiContainer.Find< int16_t >( 10 ).has_value() );
+         CHECK_FALSE( multiContainer.Find< Test >( { 10, 11 } ).has_value() );
+         CHECK_FALSE( multiContainer.Find< Test >( { 10, 13 } ).has_value() );
+      }
+   }
+}
+
+SCENARIO( "MultiContainer can be inserted and searched with the type it's initialized", "[MultiContainer]" )
+{
+   fsk::MultiContainer multiContainer;
+
+   multiContainer.InsertTypeSlot< std::set< int32_t > >();
+   multiContainer.InsertTypeSlot< std::set< int16_t > >();
+   multiContainer.InsertTypeSlot< std::set< Test > >();
 
    GIVEN( "A MultiContainer with multiple types" )
    {
