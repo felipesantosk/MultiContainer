@@ -1,5 +1,7 @@
+#pragma once
 
-#include <any>
+#include "Container.h"
+
 #include <map>
 #include <memory>
 #include <optional>
@@ -7,34 +9,6 @@
 
 namespace fsk
 {
-   struct IContainer
-   {
-      virtual void Insert( const std::any &object ) = 0;
-      virtual std::any Find( const std::any &filter ) = 0;
-   };
-
-   template< typename CT > struct Container : IContainer
-   {
-      void Insert( const std::any &object ) override
-      {
-         m_container.insert( std::any_cast< CT::value_type >( object ) );
-      }
-
-      std::any Find( const std::any &filter ) override
-      {
-         auto itr = m_container.find( std::any_cast< CT::value_type >( filter ) );
-
-         if( itr == std::cend( m_container ) )
-         {
-            return {};
-         }
-
-         return *itr;
-      }
-
-      CT m_container;
-   };
-
    class MultiContainer
    {
     public:

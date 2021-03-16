@@ -116,3 +116,12 @@ SCENARIO( "MultiContainer can be inserted and searched with the type it's initia
       }
    }
 }
+
+SCENARIO( "Check support container types  ", "[MultiContainer]" )
+{
+   fsk::MultiContainer multiContainer;
+
+   WHEN( "Is std::set" ) { multiContainer.InsertTypeSlot< std::set< int32_t > >(); }
+
+   WHEN( "Is unordered_set" ) { multiContainer.InsertTypeSlot< std::unordered_set< int32_t > >(); }
+}
