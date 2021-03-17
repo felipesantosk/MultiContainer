@@ -51,12 +51,12 @@ SCENARIO( "MultiContainer can be inserted and searched with the type it's initia
 {
    fsk::MultiContainer multiContainer;
 
-   multiContainer.InsertTypeSlot< std::set< int32_t > >();
-   multiContainer.InsertTypeSlot< std::set< int16_t > >();
-   multiContainer.InsertTypeSlot< std::set< Test > >();
-
    GIVEN( "A MultiContainer with multiple types" )
    {
+      multiContainer.InsertTypeSlot< std::set< int32_t > >();
+      multiContainer.InsertTypeSlot< std::set< int16_t > >();
+      multiContainer.InsertTypeSlot< std::set< Test > >();
+
       multiContainer.Insert< int32_t >( 10 );
       multiContainer.Insert< int32_t >( 14 );
       multiContainer.Insert< int16_t >( 10 );
@@ -111,6 +111,50 @@ SCENARIO( "MultiContainer can be inserted and searched with the type it's initia
                const auto value = multiContainer.Find< Test >( { 10, 12 } );
 
                THEN( "return a empty optional type" ) { CHECK_FALSE( value.has_value() ); }
+            }
+         }
+      }
+   }
+}
+
+SCENARIO( "MultiContainer can be iterated", "[MultiContainer]" )
+{
+   fsk::MultiContainer multiContainer;
+
+   GIVEN( "A MultiContainer with multiple types" )
+   {
+      multiContainer.InsertTypeSlot< std::set< int32_t > >();
+      multiContainer.InsertTypeSlot< std::set< Test > >();
+      multiContainer.InsertTypeSlot< std::unordered_set< uint8_t > >();
+
+      CHECK( multiContainer.size() == 3 );
+
+      for( const auto &container : multiContainer )
+      {
+         REQUIRE( container.second != nullptr );
+
+         if( container.first == std::type_index( typeid( int32_t ) ) )
+         {
+            WHEN( "It's initialized with std::set< int32_t >" )
+            {
+               CHECK( dynamic_cast< fsk::Container< std::set< int32_t > > * >( container.second.get() ) != nullptr );
+            }
+         }
+
+         if( container.first == std::type_index( typeid( Test ) ) )
+         {
+            WHEN( "It's initialized with std::set< Test >" )
+            {
+               CHECK( dynamic_cast< fsk::Container< std::set< Test > > * >( container.second.get() ) != nullptr );
+            }
+         }
+
+         if( container.first == std::type_index( typeid( uint8_t ) ) )
+         {
+            WHEN( "It's initialized with std::unordered_set< uint8_t >" )
+            {
+               CHECK( dynamic_cast< fsk::Container< std::unordered_set< uint8_t > > * >( container.second.get() ) !=
+                      nullptr );
             }
          }
       }

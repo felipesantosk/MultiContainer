@@ -12,6 +12,14 @@ namespace fsk
    class MultiContainer
    {
     public:
+      using Containers = std::map< std::type_index, std::unique_ptr< IContainer > >;
+
+      Containers::iterator begin() { return std::begin( m_containers ); }
+
+      Containers::iterator end() { return std::end( m_containers ); }
+
+      size_t size() const { return m_containers.size(); }
+
       template< typename CT > void InsertTypeSlot()
       {
          m_containers[std::type_index( typeid( CT::value_type ) )] = std::make_unique< Container< CT > >();
@@ -47,6 +55,6 @@ namespace fsk
       }
 
     private:
-      std::map< std::type_index, std::unique_ptr< IContainer > > m_containers;
+      Containers m_containers;
    };
 } // namespace fsk
