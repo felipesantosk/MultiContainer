@@ -6,7 +6,7 @@
 ## [Pipeline](./doc/pipeline.md)
 
 ## Usage
- - Initialize a int8_t and int32_t  container
+ - Initializing containers:
 
 ```CPP
 
@@ -16,7 +16,7 @@
 
 ```
 
-- Insert new elements in int8_t container
+- Insert new elements in, like in int8_t container:
 
 ```CPP
 
@@ -26,7 +26,7 @@
 
 ```
 
-- Search for  new elements in int8_t container
+- Search for  elements in int8_t container for example:
 
 ```CPP
 
